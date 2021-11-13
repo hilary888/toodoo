@@ -11,6 +11,7 @@ struct Todo {
     created_at: String,
     updated_at: String,
 }
+
 #[get("/<id>")]
 fn get_todo(id: usize) -> Json<Todo> {
     Json(Todo{ 
