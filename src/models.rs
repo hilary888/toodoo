@@ -16,7 +16,7 @@ pub struct TodoData {
     pub body: String,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, AsChangeset)]
 #[table_name="todo"]
 pub struct NewTodo {
     pub title: Option<String>,

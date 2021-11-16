@@ -66,6 +66,30 @@ fn delete_todo(id: i32) -> Json<Value> {
 
     let result = diesel::delete(todo::table.find(id)).execute(&connection).is_ok();
     Json(json!({
+        "status": 200,
+        "success": result,
+    }))
+}
+
+#[put("/<id>", data="<data>")]
+fn update_todo(id: i32, data: Json<TodoData>) -> Json<Value> {
+    let todo = data.into_inner();
+    let connection = establish_connection();
+
+    let updated_todo = NewTodo {
+        title: Some(todo.title),
+        body: Some(todo.body),
+        created_at: Some(Utc::now()),
+        updated_at: Some(Utc::now()),
+    };
+
+    let result = diesel::update(todo::table.find(id))
+        .set(&updated_todo)
+        .execute(&connection)
+        .is_ok();
+
+    Json(json!({
+        "status": 200,
         "success": result,
     }))
 }
@@ -85,5 +109,6 @@ fn rocket() -> _ {
             get_todos, 
             create_todo, 
             get_todo,
+            update_todo,
             delete_todo])
 }
