@@ -8,18 +8,14 @@ extern crate dotenv;
 
 pub mod models;
 pub mod schema;
+pub mod db;
 
 use rocket::serde::json::{json, Json, Value};
-// use rocket::serde::{Serialize, Deserialize};
 use chrono::Utc;
-use diesel::pg::PgConnection;
-use diesel::prelude::*;
-use dotenv::dotenv;
-use std::env;
-
 use diesel::prelude::*;
 use models::{NewTodo, Todo, TodoData};
 use schema::*;
+use db::establish_connection;
 
 #[get("/")]
 fn get_todos() -> Json<Value> {
@@ -95,12 +91,6 @@ fn update_todo(id: i32, data: Json<TodoData>) -> Json<Value> {
     Json(json!({ "data": result }))
 }
 
-fn establish_connection() -> PgConnection {
-    dotenv().ok();
-
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
-}
 
 #[launch]
 fn rocket() -> _ {
