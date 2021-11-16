@@ -6,9 +6,9 @@ extern crate diesel;
 extern crate serde;
 extern crate dotenv;
 
-pub mod models;
-pub mod schema;
-pub mod db;
+mod models;
+mod schema;
+mod db;
 
 use rocket::serde::json::{json, Json, Value};
 use chrono::Utc;
