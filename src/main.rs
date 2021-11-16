@@ -58,7 +58,16 @@ fn get_todo(id: i32) -> Json<Todo> {
         .expect("Error loading user");
 
     Json(result)
+}
 
+#[delete("/<id>")]
+fn delete_todo(id: i32) -> Json<Value> {
+    let connection = establish_connection();
+
+    let result = diesel::delete(todo::table.find(id)).execute(&connection).is_ok();
+    Json(json!({
+        "success": result,
+    }))
 }
 
 fn establish_connection() -> PgConnection {
@@ -72,5 +81,9 @@ fn establish_connection() -> PgConnection {
 #[launch]
 fn rocket() -> _ {
     rocket::build().mount("/", 
-        routes![get_todos, create_todo, get_todo])
+        routes![
+            get_todos, 
+            create_todo, 
+            get_todo,
+            delete_todo])
 }
