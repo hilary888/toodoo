@@ -74,7 +74,7 @@ fn delete_todo(id: i32) -> Json<Value> {
 }
 
 #[put("/<id>", format = "json", data="<data>")]
-fn update_todo(id: i32, data: Json<TodoData>) -> Json<Value> {
+fn update_todo(id: i32, data: Json<TodoData>) -> Json<Todo> {
     let todo = data.into_inner();
     let connection = establish_connection();
 
@@ -87,13 +87,10 @@ fn update_todo(id: i32, data: Json<TodoData>) -> Json<Value> {
 
     let result = diesel::update(todo::table.find(id))
         .set(&updated_todo)
-        .execute(&connection)
-        .is_ok();
+        .get_result(&connection)
+        .expect("Error updating todo");
 
-    Json(json!({
-        "status": 200,
-        "success": result,
-    }))
+    Json(result)
 }
 
 fn establish_connection() -> PgConnection {
@@ -112,5 +109,7 @@ fn rocket() -> _ {
             create_todo, 
             get_todo,
             update_todo,
-            delete_todo])
+            delete_todo
+            ]
+        )
 }
