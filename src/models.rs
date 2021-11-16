@@ -10,7 +10,7 @@ pub struct Todo {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize)]
 pub struct TodoData {
     pub title: String,
     pub body: String,

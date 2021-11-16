@@ -19,17 +19,19 @@ use diesel::prelude::*;
 use schema::*;
 
 #[get("/")]
-fn get_todos() -> Json<Vec<Todo>>{
+fn get_todos() -> Json<Value>{
     let connection = establish_connection();
     let result = todo::table
         .load::<Todo>(&connection)
         .expect("Error loading todo");
 
-    Json(result)
+    Json(json!({
+        "data": result
+    }))
 }
 
 #[post("/", format = "json", data = "<user_input>")]
-fn create_todo(user_input: Json<TodoData>) -> Json<Todo> {
+fn create_todo(user_input: Json<TodoData>) -> Json<Value> {
     let todo = user_input.into_inner();
     let connection = establish_connection();
 
@@ -40,16 +42,16 @@ fn create_todo(user_input: Json<TodoData>) -> Json<Todo> {
         updated_at: Some(Utc::now()),
     };
 
-    let result = diesel::insert_into(todo::table)
+    let result: Todo = diesel::insert_into(todo::table)
         .values(&new_todo)
         .get_result(&connection)
         .expect("Error saving new todo list");
 
-    Json(result)
+    Json(json!({"data": result}))
 }
 
 #[get("/<id>")]
-fn get_todo(id: i32) -> Json<Todo> {
+fn get_todo(id: i32) -> Json<Value> {
     let connection = establish_connection();
 
     let result = todo::table
@@ -57,7 +59,7 @@ fn get_todo(id: i32) -> Json<Todo> {
         .first::<Todo>(&connection)
         .expect("Error loading user");
 
-    Json(result)
+    Json(json!({"data": result}))
 }
 
 #[delete("/<id>")]
@@ -68,13 +70,12 @@ fn delete_todo(id: i32) -> Json<Value> {
         .execute(&connection)
         .is_ok();
     Json(json!({
-        "status": 200,
         "success": result,
     }))
 }
 
 #[put("/<id>", format = "json", data="<data>")]
-fn update_todo(id: i32, data: Json<TodoData>) -> Json<Todo> {
+fn update_todo(id: i32, data: Json<TodoData>) -> Json<Value> {
     let todo = data.into_inner();
     let connection = establish_connection();
 
@@ -85,12 +86,14 @@ fn update_todo(id: i32, data: Json<TodoData>) -> Json<Todo> {
         updated_at: Some(Utc::now()),
     };
 
-    let result = diesel::update(todo::table.find(id))
+    let result: Todo = diesel::update(todo::table.find(id))
         .set(&updated_todo)
         .get_result(&connection)
         .expect("Error updating todo");
 
-    Json(result)
+    Json(json!({
+        "data": result
+    }))
 }
 
 fn establish_connection() -> PgConnection {
