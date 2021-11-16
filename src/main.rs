@@ -64,7 +64,9 @@ fn get_todo(id: i32) -> Json<Todo> {
 fn delete_todo(id: i32) -> Json<Value> {
     let connection = establish_connection();
 
-    let result = diesel::delete(todo::table.find(id)).execute(&connection).is_ok();
+    let result = diesel::delete(todo::table.find(id))
+        .execute(&connection)
+        .is_ok();
     Json(json!({
         "status": 200,
         "success": result,
