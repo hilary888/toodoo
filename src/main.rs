@@ -12,11 +12,9 @@ use diesel::prelude::*;
 use diesel::pg::PgConnection;
 use dotenv::dotenv;
 use std::env;
+use chrono:: Utc;
 
-
-
-
-use models::Todo;
+use models::{Todo, NewTodo, TodoData};
 use diesel::prelude::*;
 use schema::*;
 
@@ -26,7 +24,27 @@ fn get_todos() -> Json<Vec<Todo>>{
     let result = todo::table
         .load::<Todo>(&connection)
         .expect("Error loading todo");
-        
+
+    Json(result)
+}
+
+#[post("/", format = "json", data = "<user_input>")]
+fn create_todo(user_input: Json<TodoData>) -> Json<Todo> {
+    let todo = user_input.into_inner();
+    let connection = establish_connection();
+
+    let new_todo = NewTodo {
+        title: Some(todo.title),
+        body: Some(todo.body),
+        created_at: Some(Utc::now()),
+        updated_at: Some(Utc::now()),
+    };
+
+    let result = diesel::insert_into(todo::table)
+        .values(&new_todo)
+        .get_result(&connection)
+        .expect("Error saving new todo list");
+
     Json(result)
 }
 
@@ -40,5 +58,5 @@ fn establish_connection() -> PgConnection {
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![get_todos])
+    rocket::build().mount("/", routes![get_todos, create_todo])
 }
