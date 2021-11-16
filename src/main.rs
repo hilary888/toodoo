@@ -48,6 +48,19 @@ fn create_todo(user_input: Json<TodoData>) -> Json<Todo> {
     Json(result)
 }
 
+#[get("/<id>")]
+fn get_todo(id: i32) -> Json<Todo> {
+    let connection = establish_connection();
+
+    let result = todo::table
+        .find(id)
+        .first::<Todo>(&connection)
+        .expect("Error loading user");
+
+    Json(result)
+
+}
+
 fn establish_connection() -> PgConnection {
     dotenv().ok();
 
@@ -58,5 +71,6 @@ fn establish_connection() -> PgConnection {
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![get_todos, create_todo])
+    rocket::build().mount("/", 
+        routes![get_todos, create_todo, get_todo])
 }
