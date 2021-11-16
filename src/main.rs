@@ -71,7 +71,7 @@ fn delete_todo(id: i32) -> Json<Value> {
     }))
 }
 
-#[put("/<id>", data="<data>")]
+#[put("/<id>", format = "json", data="<data>")]
 fn update_todo(id: i32, data: Json<TodoData>) -> Json<Value> {
     let todo = data.into_inner();
     let connection = establish_connection();
