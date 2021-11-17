@@ -19,8 +19,9 @@ use db::establish_connection;
 
 #[get("/")]
 fn get_todos() -> Json<Value> {
+    use crate::schema::todo::dsl::*;
     let connection = establish_connection();
-    let result = todo::table
+    let result = todo
         .load::<Todo>(&connection)
         .expect("Error loading todo");
 
@@ -49,9 +50,10 @@ fn create_todo(user_input: Json<TodoData>) -> Json<Value> {
 
 #[get("/<id>")]
 fn get_todo(id: i32) -> Json<Value> {
+    use crate::schema::todo::dsl::*;
     let connection = establish_connection();
 
-    let result = todo::table
+    let result = todo
         .find(id)
         .first::<Todo>(&connection)
         .expect("Error loading user");
@@ -61,9 +63,10 @@ fn get_todo(id: i32) -> Json<Value> {
 
 #[delete("/<id>")]
 fn delete_todo(id: i32) -> Json<Value> {
+    use crate::schema::todo::dsl::*;
     let connection = establish_connection();
 
-    let result = diesel::delete(todo::table.find(id))
+    let result = diesel::delete(todo.find(id))
         .execute(&connection)
         .is_ok();
     Json(json!({
