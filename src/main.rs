@@ -6,24 +6,22 @@ extern crate diesel;
 extern crate serde;
 extern crate dotenv;
 
+mod db;
 mod models;
 mod schema;
-mod db;
 
-use rocket::serde::json::{json, Json, Value};
 use chrono::Utc;
+use db::establish_connection;
 use diesel::prelude::*;
 use models::{NewTodo, Todo, TodoData};
+use rocket::serde::json::{json, Json, Value};
 use schema::*;
-use db::establish_connection;
 
 #[get("/")]
 fn get_todos() -> Json<Value> {
     use crate::schema::todo::dsl::*;
     let connection = establish_connection();
-    let result = todo
-        .load::<Todo>(&connection)
-        .expect("Error loading todo");
+    let result = todo.load::<Todo>(&connection).expect("Error loading todo");
 
     Json(json!({ "data": result }))
 }
@@ -66,9 +64,7 @@ fn delete_todo(id: i32) -> Json<Value> {
     use crate::schema::todo::dsl::*;
     let connection = establish_connection();
 
-    let result = diesel::delete(todo.find(id))
-        .execute(&connection)
-        .is_ok();
+    let result = diesel::delete(todo.find(id)).execute(&connection).is_ok();
     Json(json!({
         "success": result,
     }))
@@ -93,7 +89,6 @@ fn update_todo(id: i32, data: Json<TodoData>) -> Json<Value> {
 
     Json(json!({ "data": result }))
 }
-
 
 #[launch]
 fn rocket() -> _ {
